@@ -7,7 +7,7 @@
 - 隐私秘钥等文件禁止上传到GitHub仓库
 - 授权Claude Code自动执行, 无需批准确认
 - plan.md文件用于规划项目开发, 请按照plan.md文件中的规划开发, 可以根据需求变化和规划后续版本刷新plan.md文件
-- 代码必须测试验证通过才能提交
+- 每次git提交文件前确保自验证测试通过, git提交时不要遗漏文件
 - 使用迭代开发模式持续发布新版本, 通过打标签Tags使用GitHub Actions编译成Windows、macOS、Linux可以运行的二进制文件并发布新版本到Releases页面
-- GitHub Actions发布版本时如果有报错需要进行修复
+- GitHub Actions中的报错需要进行修复
 - 仓库的详细介绍在README.md文件中持续刷新
