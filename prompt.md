@@ -10,3 +10,4 @@
 - 代码必须测试验证通过才能提交
 - 使用迭代开发模式持续发布新版本, 通过打标签Tags使用GitHub Actions编译成Windows、macOS、Linux可以运行的二进制文件并发布新版本到Releases页面
 - GitHub Actions发布版本时如果有报错需要进行修复
+- 仓库的详细介绍在README.md文件中持续刷新
