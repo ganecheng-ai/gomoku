@@ -62,13 +62,13 @@ jobs:
 
       - name: 使用 PyInstaller 打包
         run: |
-          pyinstaller --onefile --windowed --name "Gomoku" --icon=NONE main.py
+          pyinstaller --onefile --windowed --name "Gomoku-macos" --icon=NONE main.py
 
       - name: 上传构建产物
         uses: actions/upload-artifact@v4
         with:
           name: gomoku-macos
-          path: dist/Gomoku
+          path: dist/Gomoku-macos
 
   build-linux:
     runs-on: ubuntu-latest
@@ -87,20 +87,20 @@ jobs:
           python3 -m pip install --upgrade pip
           pip3 install -r requirements.txt
           sudo apt-get update
-          sudo apt-get install -y python3-pygame
+          sudo apt-get install -y python3-pygame libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev
 
       - name: 运行测试
         run: python3 -m unittest discover -v
 
       - name: 使用 PyInstaller 打包
         run: |
-          pyinstaller --onefile --windowed --name "Gomoku" --icon=NONE main.py
+          pyinstaller --onefile --windowed --name "Gomoku-linux" --icon=NONE main.py
 
       - name: 上传构建产物
         uses: actions/upload-artifact@v4
         with:
           name: gomoku-linux
-          path: dist/Gomoku
+          path: dist/Gomoku-linux
 
   release:
     needs: [build-windows, build-macos, build-linux]
@@ -122,7 +122,8 @@ jobs:
         with:
           files: |
             五子棋.exe
-            Gomoku
+            Gomoku-macos
+            Gomoku-linux
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
