@@ -13,9 +13,6 @@ import tkinter as tk
 from tkinter import filedialog
 
 from config import *
-from pygame.locals import *
-
-from config import *
 from game import GomokuGame, Stone, GameState
 from ai import GomokuAI
 from sound import SoundManager, SoundType

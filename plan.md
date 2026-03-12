@@ -54,6 +54,7 @@ gomoku/
 17. [x] v1.1.2 版本发布 - 修复 Windows 版本启动报错 (Tuple 导入问题)
 18. [x] issue #1 修复 - Windows 版本启动报错已在 v1.1.2 中修复并关闭
 19. [x] v1.1.3 版本发布 - 代码质量优化 (移动 tkinter 导入到文件顶部，修复 game_mode 同步问题)
+20. [x] v1.1.4 版本发布 - 修复重复导入问题 (清理 main.py 中的重复 pygame.locals 和 config 导入)
 
 ## 版本计划
 - v0.1.0: 基础双人对战 - 已完成
@@ -73,6 +74,8 @@ gomoku/
   - 添加加载棋谱按钮和文件对话框
 - v1.1.2: 修复 Windows 版本启动报错 - 已完成
   - 修复 `NameError: name 'Tuple' is not defined` 错误
-- v1.1.3: 代码质量优化 - 进行中
+- v1.1.3: 代码质量优化 - 已完成
   - 移动 tkinter 导入到文件顶部，符合 Python 导入规范
   - 修复 game_mode 同步问题，确保游戏状态一致性
+- v1.1.4: 修复重复导入问题 - 已完成
+  - 清理 main.py 中的重复 pygame.locals 和 config 导入
