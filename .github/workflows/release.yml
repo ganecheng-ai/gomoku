@@ -1,0 +1,128 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 运行测试
+        run: python -m unittest discover -v
+
+      - name: 使用 PyInstaller 打包
+        run: |
+          pyinstaller --onefile --windowed --name "五子棋" --icon=NONE main.py
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: gomoku-windows
+          path: dist/五子棋.exe
+
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 安装依赖
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install -r requirements.txt
+
+      - name: 运行测试
+        run: python3 -m unittest discover -v
+
+      - name: 使用 PyInstaller 打包
+        run: |
+          pyinstaller --onefile --windowed --name "Gomoku" --icon=NONE main.py
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: gomoku-macos
+          path: dist/Gomoku
+
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 安装依赖
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install -r requirements.txt
+          sudo apt-get update
+          sudo apt-get install -y python3-pygame
+
+      - name: 运行测试
+        run: python3 -m unittest discover -v
+
+      - name: 使用 PyInstaller 打包
+        run: |
+          pyinstaller --onefile --windowed --name "Gomoku" --icon=NONE main.py
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: gomoku-linux
+          path: dist/Gomoku
+
+  release:
+    needs: [build-windows, build-macos, build-linux]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 下载构建产物
+        uses: actions/download-artifact@v4
+        with:
+          pattern: gomoku-*
+          merge-multiple: true
+
+      - name: 列出产物
+        run: ls -la
+
+      - name: 创建 Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            五子棋.exe
+            Gomoku
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
