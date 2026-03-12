@@ -15,10 +15,10 @@ jobs:
 
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 设置 Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
 
@@ -32,23 +32,28 @@ jobs:
 
       - name: 使用 PyInstaller 打包
         run: |
-          pyinstaller --onefile --windowed --name "五子棋" main.py
+          pyinstaller --onefile --windowed --name "gomoku" main.py
+
+      - name: 重命名构建产物
+        run: |
+          cd dist
+          ren "gomoku.exe" "gomoku-windows-x86_64.exe"
 
       - name: 上传构建产物
         uses: actions/upload-artifact@v4
         with:
           name: gomoku-windows
-          path: dist/五子棋.exe
+          path: dist/gomoku-windows-x86_64.exe
 
   build-macos:
     runs-on: macos-latest
 
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 设置 Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
 
@@ -60,25 +65,33 @@ jobs:
       - name: 运行测试
         run: python3 -m unittest discover -v
 
-      - name: 使用 PyInstaller 打包
+      - name: 使用 PyInstaller 打包 (生成 app bundle)
         run: |
-          pyinstaller --onefile --windowed --name "Gomoku-macos" main.py
+          pyinstaller --onefile --windowed --name "Gomoku" main.py
+
+      - name: 创建 DMG 文件
+        run: |
+          mkdir -p dist/gomoku-macos
+          cp dist/Gomoku dist/gomoku-macos/
+          ln -s /Applications dist/gomoku-macos/Applications
+          hdiutil create -volname "Gomoku" -srcfolder dist/gomoku-macos -ov -format UDZO "gomoku-macos.dmg"
+          mv gomoku-macos.dmg dist/
 
       - name: 上传构建产物
         uses: actions/upload-artifact@v4
         with:
           name: gomoku-macos
-          path: dist/Gomoku-macos
+          path: dist/gomoku-macos.dmg
 
   build-linux:
     runs-on: ubuntu-latest
 
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 设置 Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
 
@@ -94,13 +107,18 @@ jobs:
 
       - name: 使用 PyInstaller 打包
         run: |
-          pyinstaller --onefile --windowed --name "Gomoku-linux" main.py
+          pyinstaller --onefile --windowed --name "gomoku" main.py
+
+      - name: 创建 tar.gz 压缩包
+        run: |
+          cd dist
+          tar -czvf gomoku-linux-x86_64.tar.gz gomoku
 
       - name: 上传构建产物
         uses: actions/upload-artifact@v4
         with:
           name: gomoku-linux
-          path: dist/Gomoku-linux
+          path: dist/gomoku-linux-x86_64.tar.gz
 
   release:
     needs: [build-windows, build-macos, build-linux]
@@ -116,14 +134,20 @@ jobs:
       - name: 列出产物
         run: ls -la
 
+      - name: 生成 SHA256 校验和文件
+        run: |
+          sha256sum gomoku-* > checksums.txt
+          cat checksums.txt
+
       - name: 创建 Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            五子棋.exe
-            Gomoku-macos
-            Gomoku-linux
+            gomoku-windows-x86_64.exe
+            gomoku-macos.dmg
+            gomoku-linux-x86_64.tar.gz
+            checksums.txt
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
