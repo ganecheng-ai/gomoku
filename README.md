@@ -126,6 +126,8 @@ gomoku/
 - v1.1.3: 代码质量优化 - 已完成
   - 移动 tkinter 导入到文件顶部，符合 Python 导入规范
   - 修复 game_mode 同步问题，确保游戏状态一致性
+- v1.1.4: 修复重复导入问题 - 已完成
+  - 清理 main.py 中的重复 pygame.locals 和 config 导入
 
 ## 构建发布
 
