@@ -70,14 +70,16 @@ jobs:
 
       - name: 使用 PyInstaller 打包 (生成 app bundle)
         run: |
-          pyinstaller --onefile --windowed --name "Gomoku" main.py
+          # macOS 使用 --onedir --windowed 生成 .app 包
+          # 注意：--onefile 和 --windowed 不能一起使用，因为 .app 包必须是目录结构
+          pyinstaller --onedir --windowed --name "Gomoku" main.py
 
       - name: 创建 DMG 文件
         run: |
           mkdir -p dist/gomoku-macos
-          cp dist/Gomoku dist/gomoku-macos/
+          cp -r dist/Gomoku.app dist/gomoku-macos/
           ln -s /Applications dist/gomoku-macos/Applications
-          hdiutil create -volname "Gomoku" -srcfolder dist/gomoku-macos -ov -format UDZO "gomoku-macos.dmg"
+          hdiutil create -volname "Gomoku" -srcfolder dist/gomoku-macos -ov -format UDZO gomoku-macos.dmg
           mv gomoku-macos.dmg dist/
 
       - name: 上传构建产物
