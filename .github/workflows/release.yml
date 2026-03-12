@@ -32,7 +32,7 @@ jobs:
 
       - name: 使用 PyInstaller 打包
         run: |
-          pyinstaller --onefile --windowed --name "五子棋" --icon=NONE main.py
+          pyinstaller --onefile --windowed --name "五子棋" main.py
 
       - name: 上传构建产物
         uses: actions/upload-artifact@v4
@@ -62,7 +62,7 @@ jobs:
 
       - name: 使用 PyInstaller 打包
         run: |
-          pyinstaller --onefile --windowed --name "Gomoku-macos" --icon=NONE main.py
+          pyinstaller --onefile --windowed --name "Gomoku-macos" main.py
 
       - name: 上传构建产物
         uses: actions/upload-artifact@v4
@@ -94,7 +94,7 @@ jobs:
 
       - name: 使用 PyInstaller 打包
         run: |
-          pyinstaller --onefile --windowed --name "Gomoku-linux" --icon=NONE main.py
+          pyinstaller --onefile --windowed --name "Gomoku-linux" main.py
 
       - name: 上传构建产物
         uses: actions/upload-artifact@v4
