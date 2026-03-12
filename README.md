@@ -123,6 +123,9 @@ gomoku/
   - 添加保存棋谱和加载棋谱按钮
 - v1.1.2: 修复 Windows 版本启动报错 - 已完成
   - 修复 `NameError: name 'Tuple' is not defined` 错误
+- v1.1.3: 代码质量优化 - 已完成
+  - 移动 tkinter 导入到文件顶部，符合 Python 导入规范
+  - 修复 game_mode 同步问题，确保游戏状态一致性
 
 ## 构建发布
 

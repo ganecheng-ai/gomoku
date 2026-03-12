@@ -9,6 +9,12 @@ from typing import Tuple
 import pygame
 from pygame.locals import *
 
+import tkinter as tk
+from tkinter import filedialog
+
+from config import *
+from pygame.locals import *
+
 from config import *
 from game import GomokuGame, Stone, GameState
 from ai import GomokuAI
@@ -453,6 +459,8 @@ class GomokuUI:
             time_limit=self.time_limit,
             first_player=self.first_player
         )
+        # 同步游戏模式到 game 实例
+        self.game.game_mode = mode
         self.last_move = None
         self.state = STATE_PLAYING
         self.ai_thinking = False
@@ -528,8 +536,6 @@ class GomokuUI:
 
             elif self.btn_save.handle_event(event):
                 # 保存棋谱
-                import tkinter as tk
-                from tkinter import filedialog
                 root = tk.Tk()
                 root.withdraw()
                 filepath = filedialog.asksaveasfilename(
@@ -547,8 +553,6 @@ class GomokuUI:
 
             elif self.btn_load.handle_event(event):
                 # 加载棋谱
-                import tkinter as tk
-                from tkinter import filedialog
                 root = tk.Tk()
                 root.withdraw()
                 filepath = filedialog.askopenfilename(
