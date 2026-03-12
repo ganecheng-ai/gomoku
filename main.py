@@ -151,6 +151,14 @@ class GomokuUI:
             560, 580, 100, 40,
             "音效：开", self.font_small
         )
+        self.btn_save = Button(
+            280, 630, 100, 40,
+            "保存棋谱", self.font_small
+        )
+        self.btn_load = Button(
+            420, 630, 100, 40,
+            "加载棋谱", self.font_small
+        )
         self.btn_settings_back = Button(
             start_x, 520, button_width, button_height,
             "返回菜单", self.font_text
@@ -324,6 +332,8 @@ class GomokuUI:
         self.btn_undo.draw(self.screen)
         self.btn_menu.draw(self.screen)
         self.btn_sound.draw(self.screen)
+        self.btn_save.draw(self.screen)
+        self.btn_load.draw(self.screen)
 
         # AI 思考中提示
         if self.ai_thinking:
@@ -512,6 +522,45 @@ class GomokuUI:
                 # 切换音效开关
                 enabled = self.sound_manager.toggle()
                 self.btn_sound.text = "音效：开" if enabled else "音效：关"
+                self.sound_manager.play(SoundType.CLICK)
+
+            elif self.btn_save.handle_event(event):
+                # 保存棋谱
+                import tkinter as tk
+                from tkinter import filedialog
+                root = tk.Tk()
+                root.withdraw()
+                filepath = filedialog.asksaveasfilename(
+                    defaultextension=".json",
+                    filetypes=[("JSON 文件", "*.json"), ("所有文件", "*.*")],
+                    title="保存棋谱"
+                )
+                if filepath:
+                    if self.game.save_game_record(filepath):
+                        print(f"棋谱已保存到：{filepath}")
+                    else:
+                        print("保存棋谱失败")
+                root.destroy()
+                self.sound_manager.play(SoundType.CLICK)
+
+            elif self.btn_load.handle_event(event):
+                # 加载棋谱
+                import tkinter as tk
+                from tkinter import filedialog
+                root = tk.Tk()
+                root.withdraw()
+                filepath = filedialog.askopenfilename(
+                    defaultextension=".json",
+                    filetypes=[("JSON 文件", "*.json"), ("所有文件", "*.*")],
+                    title="加载棋谱"
+                )
+                if filepath:
+                    if self.game.load_game_record(filepath):
+                        self.last_move = self.game.move_history[-1] if self.game.move_history else None
+                        print(f"棋谱已从 {filepath} 加载")
+                    else:
+                        print("加载棋谱失败")
+                root.destroy()
                 self.sound_manager.play(SoundType.CLICK)
 
             return True
