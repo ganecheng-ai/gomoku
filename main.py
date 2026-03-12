@@ -10,6 +10,7 @@ from pygame.locals import *
 from config import *
 from game import GomokuGame, Stone, GameState
 from ai import GomokuAI
+from sound import SoundManager, SoundType
 
 
 class Button:
@@ -70,6 +71,10 @@ class GomokuUI:
 
         # 最后落子位置
         self.last_move = None
+
+        # 音效管理器
+        self.sound_manager = SoundManager(enabled=True)
+        self.sound_toggle_button = None
 
     def _init_fonts(self):
         """初始化字体"""
@@ -132,6 +137,10 @@ class GomokuUI:
         self.btn_menu = Button(
             420, 580, 100, 40,
             "菜单", self.font_small
+        )
+        self.btn_sound = Button(
+            560, 580, 100, 40,
+            "音效：开", self.font_small
         )
 
     def _draw_board(self):
@@ -281,6 +290,7 @@ class GomokuUI:
         # 按钮
         self.btn_undo.draw(self.screen)
         self.btn_menu.draw(self.screen)
+        self.btn_sound.draw(self.screen)
 
         # AI 思考中提示
         if self.ai_thinking:
@@ -339,9 +349,11 @@ class GomokuUI:
     def _handle_menu_event(self, event: pygame.event.Event) -> bool:
         """处理菜单事件"""
         if self.btn_pvp.handle_event(event):
+            self.sound_manager.play(SoundType.START)
             self._start_game("pvp")
             return True
         elif self.btn_pve.handle_event(event):
+            self.sound_manager.play(SoundType.START)
             self._start_game("pve")
             return True
         return False
@@ -361,6 +373,8 @@ class GomokuUI:
                         # 人类玩家落子
                         self.game.make_move(row, col)
                         self.last_move = (row, col)
+                        # 播放落子音效
+                        self.sound_manager.play(SoundType.MOVE)
 
                         # 检查游戏是否结束
                         if self.game.state != GameState.PLAYING:
@@ -379,9 +393,18 @@ class GomokuUI:
                         self.game.undo_move()
                     self.game.undo_move()
                     self.last_move = self.game.move_history[-1] if self.game.move_history else None
+                    # 播放悔棋音效
+                    self.sound_manager.play(SoundType.UNDO)
 
             elif self.btn_menu.handle_event(event):
+                self.sound_manager.play(SoundType.CLICK)
                 self.state = STATE_MENU
+
+            elif self.btn_sound.handle_event(event):
+                # 切换音效开关
+                enabled = self.sound_manager.toggle()
+                self.btn_sound.text = "音效：开" if enabled else "音效：关"
+                self.sound_manager.play(SoundType.CLICK)
 
             return True
 
@@ -390,9 +413,11 @@ class GomokuUI:
     def _handle_game_over_event(self, event: pygame.event.Event) -> bool:
         """处理游戏结束事件"""
         if self.btn_restart.handle_event(event):
+            self.sound_manager.play(SoundType.START)
             self._start_game(self.game_mode)
             return True
         elif self.btn_back.handle_event(event):
+            self.sound_manager.play(SoundType.CLICK)
             self.state = STATE_MENU
             return True
         return False
@@ -407,10 +432,14 @@ class GomokuUI:
                 if row >= 0:
                     self.game.make_move(row, col)
                     self.last_move = (row, col)
+                    # 播放落子音效
+                    self.sound_manager.play(SoundType.MOVE)
 
                     # 检查游戏是否结束
                     if self.game.state != GameState.PLAYING:
                         self.state = STATE_GAME_OVER
+                        # 播放获胜音效
+                        self.sound_manager.play(SoundType.WIN)
 
                 self.ai_thinking = False
 
