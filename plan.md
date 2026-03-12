@@ -55,3 +55,4 @@ gomoku/
 - v0.3.0: 完善 UI 和音效 - 已完成
 - v0.3.1: 修复 GitHub Actions 发布配置 - 已完成
 - v1.0.0: 首次正式发布 - 已完成
+- v1.0.1: 修复 macOS 构建问题 (--onefile 改为 --onedir) - 进行中
