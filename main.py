@@ -66,6 +66,11 @@ class GomokuUI:
         self.ai_thinking = False
         self.ai_move_timer = 0
 
+        # 游戏设置
+        self.forbidden_rules = FORBIDDEN_RULES_ENABLED
+        self.time_limit = DEFAULT_TIME_LIMIT
+        self.first_player = Stone.BLACK
+
         # 创建按钮
         self._create_buttons()
 
@@ -122,6 +127,10 @@ class GomokuUI:
             start_x, 320, button_width, button_height,
             "人机对战", self.font_text
         )
+        self.btn_settings = Button(
+            start_x, 390, button_width, button_height,
+            "游戏设置", self.font_text
+        )
         self.btn_back = Button(
             start_x, 390, button_width, button_height,
             "返回菜单", self.font_text
@@ -141,6 +150,23 @@ class GomokuUI:
         self.btn_sound = Button(
             560, 580, 100, 40,
             "音效：开", self.font_small
+        )
+        self.btn_settings_back = Button(
+            start_x, 520, button_width, button_height,
+            "返回菜单", self.font_text
+        )
+        # 设置选项按钮
+        self.btn_forbidden = Button(
+            start_x, 200, button_width, button_height,
+            "禁手规则：关", self.font_text
+        )
+        self.btn_time_limit = Button(
+            start_x, 270, button_width, button_height,
+            "时限：不限时", self.font_text
+        )
+        self.btn_first_player = Button(
+            start_x, 340, button_width, button_height,
+            "先手：黑棋", self.font_text
         )
 
     def _draw_board(self):
@@ -229,6 +255,8 @@ class GomokuUI:
             self._draw_game_ui()
         elif self.state == STATE_GAME_OVER:
             self._draw_game_over()
+        elif self.state == STATE_SETTINGS:
+            self._draw_settings()
 
     def _draw_menu(self):
         """绘制菜单界面"""
@@ -245,6 +273,7 @@ class GomokuUI:
         # 按钮
         self.btn_pvp.draw(self.screen)
         self.btn_pve.draw(self.screen)
+        self.btn_settings.draw(self.screen)
 
     def _draw_mini_board(self):
         """绘制装饰性小棋盘"""
@@ -287,6 +316,10 @@ class GomokuUI:
         text_surface = self.font_text.render(player_text, True, COLOR_TEXT)
         self.screen.blit(text_surface, (20, 20))
 
+        # 显示计时器
+        if self.game.time_limit > 0:
+            self._draw_timer()
+
         # 按钮
         self.btn_undo.draw(self.screen)
         self.btn_menu.draw(self.screen)
@@ -296,6 +329,28 @@ class GomokuUI:
         if self.ai_thinking:
             thinking_text = self.font_small.render("AI 思考中...", True, COLOR_TEXT)
             self.screen.blit(thinking_text, (20, 60))
+
+    def _draw_timer(self):
+        """绘制计时器"""
+        # 更新计时器显示
+        black_time = self.game.get_time_left(Stone.BLACK)
+        white_time = self.game.get_time_left(Stone.WHITE)
+
+        if black_time is not None:
+            black_min = int(black_time) // 60
+            black_sec = int(black_time) % 60
+            black_color = COLOR_WARNING if black_time < 60 else COLOR_TEXT
+            black_text = f"黑方：{black_min}:{black_sec:02d}"
+            text_surface = self.font_small.render(black_text, True, black_color)
+            self.screen.blit(text_surface, (20, 55))
+
+        if white_time is not None:
+            white_min = int(white_time) // 60
+            white_sec = int(white_time) % 60
+            white_color = COLOR_WARNING if white_time < 60 else COLOR_TEXT
+            white_text = f"白方：{white_min}:{white_sec:02d}"
+            text_surface = self.font_small.render(white_text, True, white_color)
+            self.screen.blit(text_surface, (20, 80))
 
     def _draw_game_over(self):
         """绘制游戏结束界面"""
@@ -324,6 +379,49 @@ class GomokuUI:
         self.btn_restart.draw(self.screen)
         self.btn_back.draw(self.screen)
 
+    def _draw_settings(self):
+        """绘制设置界面"""
+        self.screen.fill(COLOR_BG)
+
+        # 标题
+        title = self.font_title.render("游戏设置", True, COLOR_TEXT)
+        title_rect = title.get_rect(center=(WINDOW_WIDTH // 2, 100))
+        self.screen.blit(title, title_rect)
+
+        # 设置选项说明
+        desc_text = self.font_small.render("请选择合适的游戏规则", True, COLOR_TEXT)
+        desc_rect = desc_text.get_rect(center=(WINDOW_WIDTH // 2, 150))
+        self.screen.blit(desc_text, desc_rect)
+
+        # 设置选项按钮
+        self.btn_forbidden.draw(self.screen)
+        self.btn_time_limit.draw(self.screen)
+        self.btn_first_player.draw(self.screen)
+        self.btn_settings_back.draw(self.screen)
+
+        # 当前设置状态说明
+        y_offset = 260
+        settings_info = [
+            f"禁手规则：{'启用' if self.forbidden_rules else '禁用'}",
+            f"时限：{self._get_time_limit_text()}",
+            f"先手：{'黑棋' if self.first_player == Stone.BLACK else '白棋'}"
+        ]
+        for info in settings_info:
+            info_surface = self.font_small.render(info, True, COLOR_TEXT)
+            self.screen.blit(info_surface, (WINDOW_WIDTH // 2 - 100, y_offset))
+            y_offset += 30
+
+    def _get_time_limit_text(self) -> str:
+        """获取时限文字描述"""
+        if self.time_limit == 0:
+            return "不限时"
+        elif self.time_limit < 60:
+            return f"{self.time_limit}秒"
+        elif self.time_limit < 3600:
+            return f"{self.time_limit // 60}分钟"
+        else:
+            return f"{self.time_limit // 3600}小时"
+
     def _get_board_position(self, mouse_pos: Tuple[int, int]) -> Tuple[int, int]:
         """将鼠标位置转换为棋盘坐标"""
         x, y = mouse_pos
@@ -337,10 +435,16 @@ class GomokuUI:
     def _start_game(self, mode: str):
         """开始新游戏"""
         self.game_mode = mode
-        self.game.reset()
+        # 应用设置
+        self.game.apply_settings(
+            forbidden_rules=self.forbidden_rules,
+            time_limit=self.time_limit,
+            first_player=self.first_player
+        )
         self.last_move = None
         self.state = STATE_PLAYING
         self.ai_thinking = False
+        self.game.start_timer()
 
         # 设置 AI 棋子
         if mode == "pve":
@@ -355,6 +459,10 @@ class GomokuUI:
         elif self.btn_pve.handle_event(event):
             self.sound_manager.play(SoundType.START)
             self._start_game("pve")
+            return True
+        elif self.btn_settings.handle_event(event):
+            self.sound_manager.play(SoundType.CLICK)
+            self.state = STATE_SETTINGS
             return True
         return False
 
@@ -422,6 +530,40 @@ class GomokuUI:
             return True
         return False
 
+    def _handle_settings_event(self, event: pygame.event.Event) -> bool:
+        """处理设置界面事件"""
+        if event.type == MOUSEBUTTONDOWN and event.button == 1:
+            # 返回菜单按钮
+            if self.btn_settings_back.handle_event(event):
+                self.sound_manager.play(SoundType.CLICK)
+                self.state = STATE_MENU
+                return True
+
+            # 禁手规则切换
+            if self.btn_forbidden.handle_event(event):
+                self.forbidden_rules = not self.forbidden_rules
+                self.btn_forbidden.text = f"禁手规则：{'开' if self.forbidden_rules else '关'}"
+                self.sound_manager.play(SoundType.CLICK)
+                return True
+
+            # 时限切换
+            if self.btn_time_limit.handle_event(event):
+                # 循环切换时限选项
+                time_indices = TIME_LIMIT_OPTIONS.index(self.time_limit)
+                self.time_limit = TIME_LIMIT_OPTIONS[(time_indices + 1) % len(TIME_LIMIT_OPTIONS)]
+                self.btn_time_limit.text = f"时限：{self._get_time_limit_text()}"
+                self.sound_manager.play(SoundType.CLICK)
+                return True
+
+            # 先手切换
+            if self.btn_first_player.handle_event(event):
+                self.first_player = Stone.WHITE if self.first_player == Stone.BLACK else Stone.BLACK
+                self.btn_first_player.text = f"先手：{'黑棋' if self.first_player == Stone.BLACK else '白棋'}"
+                self.sound_manager.play(SoundType.CLICK)
+                return True
+
+        return False
+
     def _update_ai(self):
         """更新 AI"""
         if self.ai_thinking:
@@ -462,6 +604,8 @@ class GomokuUI:
                     self._handle_game_event(event)
                 elif self.state == STATE_GAME_OVER:
                     self._handle_game_over_event(event)
+                elif self.state == STATE_SETTINGS:
+                    self._handle_settings_event(event)
 
             # AI 更新
             if self.state == STATE_PLAYING:
